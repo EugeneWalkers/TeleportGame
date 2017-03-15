@@ -39,48 +39,55 @@ public class Field extends JFrame{
 		setOptions(n, m);
 		setKeys();
 		setMenuBar();
-		setSize(Toolkit.getDefaultToolkit().getScreenSize());
+		setSize(getMinimumSize());
 		setUndecorated(true);
 		setLocationRelativeTo(null);
 		setMinimumSize(new Dimension(700, 700));
 		setVisible(true);
 	}
-	private void setMouse(){
-		addMouseListener(new MouseAdapter(){
-			 public void mouseEntered(MouseEvent e) {
-				 
-	         }
-	 
-	          public void mouseExited(MouseEvent e) {
-	        	  
-	         }
-		});
-	}
 	private void setKeys(){
 		addKeyListener(new KeyAdapter(){
 			public void keyPressed(KeyEvent key){
+				boolean changes = false;
 				switch (key.getKeyCode()){
 					case KeyEvent.VK_LEFT:
-						if (selected.x > 0){	selected.x--;	}
+						if (selected.x > 0){
+							selected.x--;
+							changes = true;
+						}
 						break;
 					case KeyEvent.VK_RIGHT:
-						if (selected.x < n-1){	selected.x++;	}
+						if (selected.x < n-1){
+							selected.x++;
+							changes = true;
+						}
 						break;
 					case KeyEvent.VK_UP:
-						if (selected.y > 0){	selected.y--;	}
+						if (selected.y > 0){	
+							selected.y--;
+							changes = true;
+						}
 						break;
 					case KeyEvent.VK_DOWN:
-						if (selected.y < m-1){	selected.y++;	}
+						if (selected.y < m-1){
+							selected.y++;
+							changes = true;
+						}
 						break;
 					case KeyEvent.VK_SPACE:
-						int a = field.get(selected.x).get(selected.y).getSecondI();
-						int b = field.get(selected.x).get(selected.y).getSecondJ();
-						selected.x=a;
-						selected.y=b;
+						int a = field.get(selected.y).get(selected.x).getSecondJ();
+						int b = field.get(selected.y).get(selected.x).getSecondI();
+						if (!pointEquals(new Point(a, b), selected)){
+							selected.x=a;
+							selected.y=b;
+							changes = true;
+						}
 						break;
 				}
-				validate();
-				repaint();
+				if (changes){
+					validate();
+					repaint();
+				}
 			}
 		});
 	}
@@ -108,6 +115,12 @@ public class Field extends JFrame{
 		field = null;
 		selected=null;
 	}
+	private boolean sizeEquals(Dimension d1, Dimension d2){
+		return (d1.height == d2.height && d1.width == d2.width);
+	}
+	private boolean pointEquals(Point p1, Point p2){
+		return (p1.x == p2.x && p1.y == p2.y);
+	}
 	private void setMenuBar(){
 		Menu options = new Menu("Options");
 		MenuItem settings = new MenuItem("Settings");
@@ -120,20 +133,25 @@ public class Field extends JFrame{
 					ButtonGroup gr = new ButtonGroup();
 					gr.add(fs);
 					gr.add(nfs);
-					fs.setSelected(true);
+					if (sizeEquals(getSize(), Toolkit.getDefaultToolkit().getScreenSize())){
+						fs.setSelected(true);
+					}
+					else{
+						nfs.setSelected(true);
+					}
 					JPanel jp = new JPanel();
 					JButton ok = new JButton("Ok");
 					ok.addActionListener(new ActionListener(){
 						@Override
 						public void actionPerformed(ActionEvent e) {
-							if (fs.isSelected()){
+							if (fs.isSelected() && !sizeEquals(getSize(), Toolkit.getDefaultToolkit().getScreenSize())){
 								setSize(Toolkit.getDefaultToolkit().getScreenSize());
 								setLocationRelativeTo(null);
 								dispose();
 								setUndecorated(true);
 								setVisible(true);
 							}
-							else{
+							else if (nfs.isSelected() && sizeEquals(getSize(), Toolkit.getDefaultToolkit().getScreenSize())){
 								setSize(4*X+S*n, 2*Y+S*m);
 								setLocationRelativeTo(null);
 								dispose();
